@@ -14,10 +14,16 @@ void main()
 {
     highp ivec2 lut_tex_size = textureSize(color_grading_lut_texture_sampler, 0);
     highp float _COLORS      = float(lut_tex_size.y);
-
     highp vec4 color       = subpassLoad(in_color).rgba;
-    
-    // texture(color_grading_lut_texture_sampler, uv)
 
-    out_color = color;
+    highp float IndexB = floor( color.z * _COLORS - 0.5 );
+	highp float FractB = color.z * _COLORS - 0.5 - IndexB;
+
+    highp float U = (color.x + IndexB) / _COLORS;
+	highp float V = color.y;
+
+    highp vec4 color_min = texture(color_grading_lut_texture_sampler, vec2(U,V));
+    highp vec4 color_max = texture(color_grading_lut_texture_sampler, vec2(U + (1.0/_COLORS),V));
+
+    out_color = mix(color_min, color_max, FractB);
 }
